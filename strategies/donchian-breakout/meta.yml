@@ -1,0 +1,34 @@
+slug: donchian-breakout
+number: 3
+title: The Turtle Traders' Rule Dodged the COVID Crash. It Also Turned $1 into $8 Instead of $70.
+deck: It solves the exact problem my last two articles couldn't. Then it charges six percentage points
+  a year for the privilege.
+published: 2026-10-29
+family: trend-following
+sub_family: channel breakout
+asset_class: us-equity
+frequency: daily
+universe:
+- VFINX
+- VBMFX
+period:
+  start: '1987-01-02'
+  end: '2026-10-28'
+costs_bps: 10
+summary_json: output/donchian_summary.json
+headline:
+  cagr: donchian_20_10.cagr
+  sharpe: donchian_20_10.sharpe
+  max_drawdown: donchian_20_10.max_drawdown
+og_image: dc_c2_crashes.png
+og_description: 'Donchian breakout on the S&P 500, 1987-2026: the fast-crash problem solved, at six points
+  a year.'
+code_note: Same open-source harness as the rest of the series, now with daily rebalancing added to the
+  engine. Each run writes a single JSON file with every metric, which is what these charts and tables
+  were rendered from.
+next_teaser: RSI(2) mean reversion — the opposite bet to everything tested so far, and the one that should
+  do well in exactly the chopping markets that destroyed this one.
+references: 'Faith, C. (2007), _Way of the Turtle_. Donchian, R. (1960), "High Finance in Copper", _Financial
+  Analysts Journal_. The original Turtle rules were released publicly in 2003. Antonacci, G. (2014), _Dual
+  Momentum Investing_. Faber, M. (2007), "A Quantitative Approach to Tactical Asset Allocation". Data:
+  Yahoo Finance adjusted closes, retrieved 29 October 2026.'
