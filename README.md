@@ -14,10 +14,10 @@ Author: Abhinav Taduka — software architect, quant algo developer. EPAT (Quant
 <!-- strategies:start -->
 | # | Strategy | Family | Rebalance | Period | CAGR | Sharpe | Max DD |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 01 | [I Backtested Dual Momentum for 29 Years](strategies/dual-momentum) | trend-following | monthly | 1997–2026 | 10.25% | 0.72 | −33.83% |
-| 02 | [The 10-Month Moving Average Is the Most Famous Rule in Tactical Investing](strategies/sma-trend-filter) | trend-following | monthly | 1987–2026 | 9.38% | 0.71 | −35.18% |
-| 03 | [The Turtle Traders' Rule Dodged the COVID Crash](strategies/donchian-breakout) | trend-following | daily | 1987–2026 | 5.24% | 0.56 | −35.83% |
-| 04 | [RSI(2) Wins 72% of Its Trades](strategies/rsi2-mean-reversion) | mean-reversion | daily | 1987–2026 | 3.62% | 0.79 | −15.69% |
+| 01 | [Dual Momentum (GEM)](strategies/dual-momentum) | trend-following | monthly | 1997–2026 | 10.25% | 0.72 | −33.83% |
+| 02 | [10-month SMA filter](strategies/sma-trend-filter) | trend-following | monthly | 1987–2026 | 9.38% | 0.71 | −35.18% |
+| 03 | [Donchian 20/10 breakout](strategies/donchian-breakout) | trend-following | daily | 1987–2026 | 5.24% | 0.56 | −35.83% |
+| 04 | [RSI(2) mean reversion](strategies/rsi2-mean-reversion) | mean-reversion | daily | 1987–2026 | 3.62% | 0.79 | −15.69% |
 <!-- strategies:end -->
 
 Benchmarks and the full metric sheet for each run live in that strategy's `output/*.json`.

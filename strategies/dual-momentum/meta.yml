@@ -1,6 +1,7 @@
 slug: dual-momentum
 number: 1
 title: I Backtested Dual Momentum for 29 Years. It Stopped Working the Year the Book Came Out.
+short_name: Dual Momentum (GEM)
 deck: Full rules, 90+ metrics, <a class="gl" href="../glossary/#walk-forward">walk-forward</a> validation,
   and all the code. The risk numbers held up. The returns did not.
 published: 2026-10-22

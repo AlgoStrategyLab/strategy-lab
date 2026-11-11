@@ -1,8 +1,9 @@
 slug: rsi2-mean-reversion
 number: 4
 title: RSI(2) Wins 72% of Its Trades. More Than Half of What It Earns Is T-Bill Interest.
-deck: The most copied mean-reversion rule in retail trading, tested over 40 years. The signal is
-  real. The strategy around it is mostly cash.
+short_name: RSI(2) mean reversion
+deck: The most copied mean-reversion rule in retail trading, tested over 40 years. The signal is real.
+  The strategy around it is mostly cash.
 published: 2026-11-09
 family: mean-reversion
 sub_family: short-term oversold
@@ -21,16 +22,15 @@ headline:
   sharpe: main.sharpe
   max_drawdown: main.max_drawdown
 og_image: rsi_c2_decomposition.png
-og_description: 'RSI(2) mean reversion backtested on the S&P 500, 1987-2026: a real signal, 72% of
-  trades profitable, and a strategy that is invested 6% of the time and earns most of its return
-  from Treasury bills.'
-code_note: "Same open-source harness as the rest of the series. The engine's daily rebalancing,
-  added for article #3, is what makes a rule that holds for three days testable at all. Each run
-  writes a single JSON file with every metric, which is what these charts and tables were rendered
-  from."
-next_teaser: 'pairs trading — the first strategy in this series that does not need the market to go
-  anywhere at all, and the first where the hard part is deciding what counts as a pair.'
-references: 'Connors, L. & Alvarez, C. (2008), _Short Term Trading Strategies That Work_. Wilder,
-  J. W. (1978), _New Concepts in Technical Trading Systems_ — the original RSI. Faber, M. (2007),
-  "A Quantitative Approach to Tactical Asset Allocation". Antonacci, G. (2014), _Dual Momentum
-  Investing_. Data: Yahoo Finance adjusted closes, retrieved 9 November 2026.'
+og_description: 'RSI(2) mean reversion backtested on the S&P 500, 1987-2026: a real signal, 72% of trades
+  profitable, and a strategy that is invested 6% of the time and earns most of its return from Treasury
+  bills.'
+code_note: 'Same open-source harness as the rest of the series. The engine''s daily rebalancing, added
+  for article #3, is what makes a rule that holds for three days testable at all. Each run writes a single
+  JSON file with every metric, which is what these charts and tables were rendered from.'
+next_teaser: pairs trading — the first strategy in this series that does not need the market to go anywhere
+  at all, and the first where the hard part is deciding what counts as a pair.
+references: 'Connors, L. & Alvarez, C. (2008), _Short Term Trading Strategies That Work_. Wilder, J. W.
+  (1978), _New Concepts in Technical Trading Systems_ — the original RSI. Faber, M. (2007), "A Quantitative
+  Approach to Tactical Asset Allocation". Antonacci, G. (2014), _Dual Momentum Investing_. Data: Yahoo
+  Finance adjusted closes, retrieved 9 November 2026.'

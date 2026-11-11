@@ -29,7 +29,7 @@ for col,colr in [("Donchian",C["blue"]),("SP500",C["orange"]),("Momentum",C["aqu
 ax.set_title("Growth of $1, Jan 1987 – Oct 2026 (log scale)", fontweight="bold")
 ax.legend(loc="upper left"); ax.set_xlim(s.index[0], s.index[-1]+pd.Timedelta(days=1000))
 ax.xaxis.set_major_locator(mdates.YearLocator(4))
-fig.tight_layout(); fig.savefig(OUT/"c1_equity.png"); plt.close(fig)
+fig.tight_layout(); fig.savefig(OUT/"dc_c1_equity.png"); plt.close(fig)
 
 # 2 — THE crash-response chart
 crashes = ["2011 Euro crisis","2015-16 correction","2018 Q4","COVID crash","2022 bear","2025 tariff shock"]
@@ -50,7 +50,7 @@ ax.set_xticks(x); ax.set_xticklabels(crashes, fontsize=9.5)
 ax.set_ylabel("Return through the episode (%)"); ax.set_ylim(-42, 6)
 ax.set_title("What a daily exit buys you: Donchian in six selloffs", fontweight="bold")
 ax.legend(loc="lower left", ncol=1)
-fig.tight_layout(); fig.savefig(OUT/"c2_crashes.png"); plt.close(fig)
+fig.tight_layout(); fig.savefig(OUT/"dc_c2_crashes.png"); plt.close(fig)
 
 # 3 — parameter grid heatmap
 g = pd.DataFrame(S["grid"])
@@ -70,7 +70,7 @@ for i in range(piv.shape[0]):
                 ax.add_patch(plt.Rectangle((j-.5,i-.5),1,1,fill=False,edgecolor=C["ink"],lw=2.5))
 ax.set_xlabel("Exit channel (days)"); ax.set_ylabel("Entry channel (days)")
 ax.set_title("CAGR by channel length — boxed is the Turtles' System 1 (20/10)\nS&P 500 buy & hold returned 11.3%", fontweight="bold", fontsize=11.5)
-fig.tight_layout(); fig.savefig(OUT/"c3_grid.png"); plt.close(fig)
+fig.tight_layout(); fig.savefig(OUT/"dc_c3_grid.png"); plt.close(fig)
 
 # 4 — cost cliff
 cs = pd.DataFrame(S["cost_sensitivity"])
@@ -84,7 +84,7 @@ ax.axhline(S["benchmark"]["cagr"]*100, color=C["orange"], ls="--", lw=1.3)
 ax.text(50, S["benchmark"]["cagr"]*100-1.0, "S&P 500 buy & hold", color=C["orange"], fontsize=9, ha="right")
 ax.set_xlabel("Round-trip cost per trade (basis points)"); ax.set_ylabel("CAGR (%)")
 ax.set_title("At 24x annual turnover, costs decide everything", fontweight="bold")
-fig.tight_layout(); fig.savefig(OUT/"c4_costs.png"); plt.close(fig)
+fig.tight_layout(); fig.savefig(OUT/"dc_c4_costs.png"); plt.close(fig)
 
 # 5 — does a breakout predict anything?
 sg = S["signals"]
@@ -100,7 +100,7 @@ a.bar(["After a 20-day\nbreakout","Any random day"], vals, color=[C["blue"],C["i
 for i,v in enumerate(vals): a.text(i,v,f"+{v:.2f}%",ha="center",va="bottom",fontsize=11,fontweight="bold",color=C["ink2"])
 a.set_ylim(0,1.25); a.set_title("Average S&P return over the next 20 days")
 fig.suptitle(f"The signal predicts nothing: {sg['s1_entries']} breakouts over 40 years", fontweight="bold")
-fig.tight_layout(); fig.savefig(OUT/"c5_edge.png"); plt.close(fig)
+fig.tight_layout(); fig.savefig(OUT/"dc_c5_edge.png"); plt.close(fig)
 
 # 6 — drawdowns
 fig, ax = plt.subplots(figsize=(11,3.8), dpi=160)
@@ -112,5 +112,5 @@ ax.annotate("underwater from Jan 1999 to May 2013", xy=(pd.Timestamp("2006-01-01
             arrowprops=dict(arrowstyle="-", color=C["ink2"]))
 ax.set_title("Donchian's worst drawdown took fourteen years to recover", fontweight="bold")
 ax.legend(loc="lower right", ncol=2); ax.xaxis.set_major_locator(mdates.YearLocator(4))
-fig.tight_layout(); fig.savefig(OUT/"c6_drawdown.png"); plt.close(fig)
+fig.tight_layout(); fig.savefig(OUT/"dc_c6_drawdown.png"); plt.close(fig)
 print("charts written")

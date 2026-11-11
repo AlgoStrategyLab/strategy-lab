@@ -11,7 +11,7 @@ d, m55, dv = S["donchian_20_10"], S["donchian_55_20"], S["donchian_vol_sized"]
 sma, mom, bm, sf = S["sma"], S["momentum"], S["benchmark"], S["sixty_forty"]
 e = S["donchian_extended"]; sg = S["signals"]
 
-render("t_headline", ["Metric","Donchian 20/10","SMA (10 mo)","Momentum (12 mo)","S&P 500"],
+render("dc_t_headline", ["Metric","Donchian 20/10","SMA (10 mo)","Momentum (12 mo)","S&P 500"],
  [["Growth of $1", f"${d['total_return']+1:.0f}", f"${sma['total_return']+1:.0f}", f"${mom['total_return']+1:.0f}", f"${bm['total_return']+1:.0f}"],
   ["CAGR", pc(d["cagr"]), pc(sma["cagr"]), pc(mom["cagr"]), pc(bm["cagr"])],
   ["Annualised volatility", p1(d["volatility"]), p1(sma["volatility"]), p1(mom["volatility"]), p1(bm["volatility"])],
@@ -26,7 +26,7 @@ render("t_headline", ["Metric","Donchian 20/10","SMA (10 mo)","Momentum (12 mo)"
   ["Cost drag at 10 bps", f"{e['trading']['avg_cost_drag_annual']*100:.2f} pts/yr", "0.11 pts/yr", "0.06 pts/yr", "—"]],
  title="Donchian against the previous two filters, Jan 1987 - Oct 2026", col_w=[0.32,0.18,0.17,0.19,0.14], highlight_col=1)
 
-render("t_trading", ["Measure","System 1 (20/10)","System 2 (55/20)"],
+render("dc_t_trading", ["Measure","System 1 (20/10)","System 2 (55/20)"],
  [["Entries over 39.8 years", str(sg["s1_entries"]), str(sg["s2_entries"])],
   ["Signal switches", str(sg["s1_switches"]), str(sg["s2_switches"])],
   ["Switches per year", str(sg["s1_switches_per_year"]), str(sg["s2_switches_per_year"])],
@@ -37,17 +37,17 @@ render("t_trading", ["Measure","System 1 (20/10)","System 2 (55/20)"],
   ["Maximum drawdown", p1(d["max_drawdown"]), p1(m55["max_drawdown"])]],
  title="How much this rule trades", col_w=[0.44,0.28,0.28], highlight_col=1)
 
-render("t_edge", ["Measure","After a 20-day breakout","Any random day"],
+render("dc_t_edge", ["Measure","After a 20-day breakout","Any random day"],
  [["Chance the S&P is higher 20 days later", p1(sg["s1_pct_entries_up_20d"]), p1(sg["baseline_pct_up_20d"])],
   ["Average S&P return over the next 20 days", pc(sg["s1_avg_fwd20_after_entry"]), pc(sg["baseline_avg_fwd20"])],
   ["Sample size", f"{sg['s1_entries']} breakouts", f"{sg['days']:,} days"]],
  title="Does a breakout predict anything? (S&P 500, 1987-2026)", col_w=[0.48,0.26,0.26])
 
-render("t_episodes", ["Episode","Donchian 20/10","SMA (10 mo)","Momentum (12 mo)","S&P 500"],
+render("dc_t_episodes", ["Episode","Donchian 20/10","SMA (10 mo)","Momentum (12 mo)","S&P 500"],
  [[x["episode"], p1(x["donchian"]), p1(x["sma"]), p1(x["momentum"]), p1(x["sp500"])] for x in S["episodes"]],
  title="Every major episode, 1987-2026", col_w=[0.34,0.18,0.16,0.18,0.14], highlight_col=1)
 
-render("t_variants", ["Variant","CAGR","Sharpe","Max drawdown","Turnover"],
+render("dc_t_variants", ["Variant","CAGR","Sharpe","Max drawdown","Turnover"],
  [["Donchian 20/10 (Turtle System 1)", pc(d["cagr"]), f"{d['sharpe']:.2f}", p1(d["max_drawdown"]), f"{d['annual_turnover']*100:.0f}%"],
   ["Donchian 55/20 (Turtle System 2)", pc(m55["cagr"]), f"{m55['sharpe']:.2f}", p1(m55["max_drawdown"]), f"{m55['annual_turnover']*100:.0f}%"],
   ["Donchian 20/10, volatility-sized", pc(dv["cagr"]), f"{dv['sharpe']:.2f}", p1(dv["max_drawdown"]), f"{dv['annual_turnover']*100:.0f}%"],
@@ -59,14 +59,14 @@ render("t_variants", ["Variant","CAGR","Sharpe","Max drawdown","Turnover"],
  title="Every variant tested", col_w=[0.42,0.14,0.13,0.17,0.14], highlight_col=1)
 
 b = S["basket"]
-render("t_basket", ["Variant (from Feb 2006)","CAGR","Sharpe","Max drawdown","Turnover"],
+render("dc_t_basket", ["Variant (from Feb 2006)","CAGR","Sharpe","Max drawdown","Turnover"],
  [["Donchian 20/10 across 6 assets", pc(b["basket"]["cagr"]), f"{b['basket']['sharpe']:.2f}", p1(b["basket"]["max_drawdown"]), f"{b['basket']['annual_turnover']*100:.0f}%"],
   ["Donchian 20/10 on SPY alone", pc(b["single_spy"]["cagr"]), f"{b['single_spy']['sharpe']:.2f}", p1(b["single_spy"]["max_drawdown"]), f"{b['single_spy']['annual_turnover']*100:.0f}%"],
   ["SPY buy & hold", pc(b["spy_buy_hold"]["cagr"]), f"{b['spy_buy_hold']['sharpe']:.2f}", p1(b["spy_buy_hold"]["max_drawdown"]), "5%"]],
  title="Does diversifying rescue it? SPY, EFA, TLT, GLD, DBC, VNQ", col_w=[0.42,0.14,0.13,0.17,0.14])
 
 io = S["in_out_sample"]
-render("t_inout", ["Metric","1987-2002 (before the rules went public)","2003-2026 (after)"],
+render("dc_t_inout", ["Metric","1987-2002 (before the rules went public)","2003-2026 (after)"],
  [["Donchian CAGR", pc(io["in_sample"]["cagr"]), pc(io["out_of_sample"]["cagr"])],
   ["Donchian Sharpe", f"{io['in_sample']['sharpe']:.2f}", f"{io['out_of_sample']['sharpe']:.2f}"],
   ["Donchian max drawdown", p1(io["in_sample"]["max_drawdown"]), p1(io["out_of_sample"]["max_drawdown"])],
@@ -74,7 +74,7 @@ render("t_inout", ["Metric","1987-2002 (before the rules went public)","2003-202
   ["Donchian minus S&P 500", f"{(io['in_sample']['cagr']-io['benchmark_in_sample']['cagr'])*100:+.1f} pts", f"{(io['out_of_sample']['cagr']-io['benchmark_out_of_sample']['cagr'])*100:+.1f} pts"]],
  title="Before and after the Turtle rules were published free in 2003", col_w=[0.34,0.36,0.30])
 
-render("t_setup", ["Setting","Value"],
+render("dc_t_setup", ["Setting","Value"],
  [["Data","Yahoo Finance daily closes, dividend-adjusted"],
   ["Period","2 Jan 1987 - 28 Oct 2026  (39.8 years)"],
   ["Risky asset","VFINX (Vanguard 500 Index)"],
