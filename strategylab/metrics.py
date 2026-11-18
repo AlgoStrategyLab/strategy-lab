@@ -64,6 +64,23 @@ def _ann_return(daily: pd.Series) -> float:
 
 
 # --------------------------------------------------------------------------- core
+def _div(numerator: float, denominator: float) -> float:
+    """Divide, or return NaN when the denominator is zero or not finite.
+
+    Several ratios here divide by a volatility, a beta, or a count of up/down days.
+    Each of those is legitimately zero for a degenerate run — a strategy that never
+    takes a position has no volatility, and a short backtest can contain no down days
+    — and a crash there is worse than a missing number.
+    """
+    try:
+        if denominator == 0 or not np.isfinite(denominator):
+            return float("nan")
+        value = numerator / denominator
+        return float(value) if np.isfinite(value) else float("nan")
+    except (ZeroDivisionError, TypeError, ValueError):
+        return float("nan")
+
+
 def compute_metrics(daily: pd.Series, bench_daily: pd.Series | None = None, rf: float = 0.0) -> dict:
     daily = daily.dropna()
     n = len(daily)
@@ -208,7 +225,7 @@ def extended_metrics(daily: pd.Series, bench_daily: pd.Series | None = None, rf:
             "gain_to_pain_monthly": round(gain_to_pain_m, 3), "profit_factor_monthly": round(profit_factor_m, 3),
             "payoff_ratio_monthly": round(payoff_m, 3), "martin_ratio_upi": round(martin, 3),
             "sterling_ratio": round(sterling, 3), "burke_ratio": round(burke, 3),
-            "return_to_vol": round(cagr / vol, 3), "kelly_fraction": round(kelly, 3),
+            "return_to_vol": round(_div(cagr, vol), 3), "kelly_fraction": round(kelly, 3),
             "risk_of_ruin_proxy_pct_months_below_minus10": round(float((monthly < -0.10).mean()), 4),
         },
     }
@@ -217,15 +234,19 @@ def extended_metrics(daily: pd.Series, bench_daily: pd.Series | None = None, rf:
         bm = (1 + b).resample("ME").prod() - 1
         beq = (1 + b).cumprod(); bcagr = float(beq.iloc[-1] ** (1 / years) - 1)
         bvol = float(b.std() * np.sqrt(TRADING_DAYS))
-        cov = np.cov(daily, b); beta = float(cov[0, 1] / cov[1, 1])
+        cov = np.cov(daily, b); beta = _div(cov[0, 1], cov[1, 1])
         alpha = float(((daily - rf_d) - beta * (b - rf_d)).mean() * TRADING_DAYS)
         active = daily - b; te = float(active.std() * np.sqrt(TRADING_DAYS))
         up = b > 0; dn = b < 0
-        up_cap = float(((1 + daily[up]).prod() ** (TRADING_DAYS / up.sum()) - 1) / ((1 + b[up]).prod() ** (TRADING_DAYS / up.sum()) - 1))
-        dn_cap = float(((1 + daily[dn]).prod() ** (TRADING_DAYS / dn.sum()) - 1) / ((1 + b[dn]).prod() ** (TRADING_DAYS / dn.sum()) - 1))
+        up_cap = _div(((1 + daily[up]).prod() ** (TRADING_DAYS / max(up.sum(), 1)) - 1),
+                      ((1 + b[up]).prod() ** (TRADING_DAYS / max(up.sum(), 1)) - 1)) if up.any() else float("nan")
+        dn_cap = _div(((1 + daily[dn]).prod() ** (TRADING_DAYS / max(dn.sum(), 1)) - 1),
+                      ((1 + b[dn]).prod() ** (TRADING_DAYS / max(dn.sum(), 1)) - 1)) if dn.any() else float("nan")
         upm = bm > 0; dnm = bm < 0
-        up_cap_m = float(monthly[upm].mean() / bm[upm].mean()); dn_cap_m = float(monthly[dnm].mean() / bm[dnm].mean())
-        beta_up = float(np.cov(daily[up], b[up])[0, 1] / b[up].var()); beta_dn = float(np.cov(daily[dn], b[dn])[0, 1] / b[dn].var())
+        up_cap_m = _div(monthly[upm].mean(), bm[upm].mean()) if upm.any() else float("nan")
+        dn_cap_m = _div(monthly[dnm].mean(), bm[dnm].mean()) if dnm.any() else float("nan")
+        beta_up = _div(np.cov(daily[up], b[up])[0, 1], b[up].var()) if up.sum() > 1 else float("nan")
+        beta_dn = _div(np.cov(daily[dn], b[dn])[0, 1], b[dn].var()) if dn.sum() > 1 else float("nan")
         rel = equity / beq; rel_dd = float((rel / rel.cummax() - 1).min())
         m2 = float(rf + (sharpe * bvol))                                            # Modigliani M²
         treynor = float((cagr - rf) / beta) if beta != 0 else np.nan

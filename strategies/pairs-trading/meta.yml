@@ -1,0 +1,59 @@
+slug: pairs-trading
+number: 5
+title: Pairs Trading Held a Beta of 0.02 for 27 Years. Choosing the Pairs Added Nothing.
+short_name: Pairs trading
+deck: The textbook distance method, tested on the 22 ETFs a retail trader can actually borrow. It is the
+  most market-neutral thing in this series, and randomly chosen pairs did just as well.
+published: 2026-11-18
+family: statistical-arbitrage
+sub_family: distance-method pairs
+asset_class: us-equity-etf
+frequency: daily
+universe:
+- SPY
+- DIA
+- QQQ
+- IWM
+- MDY
+- XLB
+- XLE
+- XLF
+- XLI
+- XLK
+- XLP
+- XLU
+- XLV
+- XLY
+- EWA
+- EWC
+- EWG
+- EWH
+- EWJ
+- EWS
+- EWU
+- EWW
+period:
+  start: '2000-01-03'
+  end: '2026-11-17'
+costs_bps: 10
+summary_json: output/pairs_summary.json
+headline:
+  cagr: main.cagr
+  sharpe: main.sharpe
+  max_drawdown: main.max_drawdown
+og_image: pt_c3_selection.png
+og_description: 'Gatev-Goetzmann-Rouwenhorst distance-method pairs trading backtested on 22 liquid ETFs,
+  2000-2026: a beta of 0.02, a 9.6% worst drawdown, 0.47% a year before costs, and no advantage over
+  pairs drawn at random.'
+code_note: 'Same open-source harness as the rest of the series. This article needed the engine to hold
+  a short book, so it now validates gross weights without rejecting negative ones and charges a borrow
+  fee on short exposure each day. Both are covered by tests. Each run writes a single JSON file with
+  every metric, which is what these charts and tables were rendered from.'
+next_teaser: volatility targeting — not a strategy that decides what to own, but a layer that decides
+  how much, applied to every rule tested in this series so far.
+references: 'Gatev, E., Goetzmann, W. N. & Rouwenhorst, K. G. (2006), "Pairs Trading: Performance of
+  a Relative-Value Arbitrage Rule", _Review of Financial Studies_ 19(3) — the distance method tested
+  here. Do, B. & Faff, R. (2010), "Does Simple Pairs Trading Still Work?", _Financial Analysts Journal_
+  66(4). Khandani, A. & Lo, A. (2007), "What Happened to the Quants in August 2007?". Avellaneda, M.
+  & Lee, J.-H. (2010), "Statistical Arbitrage in the US Equities Market". Data: Yahoo Finance adjusted
+  closes, retrieved 17 November 2026.'

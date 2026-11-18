@@ -354,12 +354,40 @@ def compare_page(strategies: list[Strategy], window: dict | None) -> str:
             f'<td>{cap[slug][0] - cap[slug][1]:+.0f}</td></tr>'
             for slug in window["order"] if slug in cap)
 
+        # Which histories differ, taken from the data rather than written in: a new
+        # strategy with an earlier or later start must not leave a stale sentence here.
+        spans = sorted(((int(str(s.meta.get("period", {}).get("start", ""))[:4]), s)
+                        for s in strategies if s.meta.get("period", {}).get("start")),
+                       key=lambda pair: pair[0])
+        if len(spans) > 1 and spans[0][0] != spans[-1][0]:
+            lo, hi = spans[0], spans[-1]
+            starts = (f"{short_name(lo[1])} goes back to {lo[0]} and {short_name(hi[1])} "
+                      f"only to {hi[0]}")
+        else:
+            starts = "they do not all start in the same year"
+
+        above = [s for s in window["directional"] if cap[s][0] > cap[s][1]]
+        n_word = {1: "One", 2: "Both", 3: "All three", 4: "All four", 5: "All five"}
+        if above and len(above) == len(window["directional"]):
+            cap_caption = (f"{n_word.get(len(above), str(len(above)))} sit above the equal-capture "
+                           "line, so each keeps proportionally more of the index's good months "
+                           "than its bad ones. None of them reach the index's upside.")
+        else:
+            cap_caption = ("Strategies above the equal-capture line keep proportionally more of "
+                           "the index's good months than its bad ones. None of them reach the "
+                           "index's upside.")
+        if window.get("neutral"):
+            names = ", ".join(window["labels"][s] for s in window["neutral"])
+            verb = "is" if len(window["neutral"]) == 1 else "are"
+            cap_caption += (f" {names} {verb} left off: a long leg and a short leg that net to "
+                            "zero leave no market exposure for a capture ratio to measure.")
+
         charts = (
             "<h2>Measured against the index, not beside it</h2>\n"
             f"<p>The table above measures each strategy over its own history, which is what its "
-            f"article reports. Those histories differ \u2014 dual momentum begins in 1997 and the "
-            f"rest in 1987 \u2014 so they are not strictly comparable with one another. Everything "
-            f"below is recomputed over {w}, the window all of them share, and compared against the "
+            f"article reports. Those histories differ \u2014 {starts} \u2014 so they are not "
+            f"strictly comparable with one another. Everything below is recomputed over {w}, the "
+            f"window all of them share, and compared against the "
             f"S&amp;P 500 throughout.</p>\n"
 
             '<figure><img src="../assets/charts/compare_relative.png" '
@@ -370,15 +398,15 @@ def compare_page(strategies: list[Strategy], window: dict | None) -> str:
 
             '<figure><img src="../assets/charts/compare_episodes.png" '
             'alt="Grid of each strategy against the index through each market episode">'
-            "<figcaption>Green in every bear market, red in every bull. These are insurance "
-            "policies: they pay out when the index falls and cost premium when it rises."
-            "</figcaption></figure>\n"
+            "<figcaption>Green in every bear market, red in every bull. The trend and "
+            "mean-reversion rules behave like insurance policies: they pay out when the index "
+            "falls and cost premium when it rises. A market-neutral book is mildly green in the "
+            "falls and deeply red in the rises for a different reason \u2014 it barely moves at "
+            "all.</figcaption></figure>\n"
 
             '<figure><img src="../assets/charts/compare_capture.png" '
             'alt="Up-capture against down-capture for each strategy, with the index at 100/100">'
-            "<figcaption>All four sit above the equal-capture line, so each keeps proportionally "
-            "more of the index's good months than its bad ones. None of them reach the index's "
-            "upside.</figcaption></figure>\n"
+            f"<figcaption>{cap_caption}</figcaption></figure>\n"
 
             + (('<div class="table-scroll">\n<table class="compare">\n'
                 "<caption>Share of the index's monthly moves each strategy captured.</caption>\n"

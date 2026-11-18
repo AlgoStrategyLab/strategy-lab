@@ -92,7 +92,8 @@ class BacktestResult:
 class Backtest:
     def __init__(self, prices: pd.DataFrame, strategy: Strategy, benchmark: str = "SPY",
                  rebalance: str = "M", cost_bps: float = 10.0, cash_rate: float = 0.0,
-                 start: str | None = None, end: str | None = None, warmup_days: int = 0):
+                 start: str | None = None, end: str | None = None, warmup_days: int = 0,
+                 borrow_bps: float = 0.0):
         self.prices = prices.sort_index()
         self.strategy = strategy
         self.benchmark = benchmark
@@ -102,6 +103,11 @@ class Backtest:
         self.start = start
         self.end = end
         self.warmup_days = warmup_days
+        #: Annual cost of borrowing stock to short, charged daily on gross short exposure.
+        #: Leaving this at zero makes a long/short book look free, which it is not: the
+        #: borrow is a real, recurring fee and for a market-neutral strategy it comes
+        #: straight off the top of a return that was never large to begin with.
+        self.borrow_bps = borrow_bps
 
     def run(self) -> BacktestResult:
         px = self.prices
@@ -137,10 +143,17 @@ class Backtest:
         tgt_map = {d: targets.loc[d].values for d in targets.index}
         r_eval = rets.loc[eval_idx].values
 
+        daily_borrow = self.borrow_bps / 1e4 / 252.0
+        short_exposure = np.zeros(n)
+        gross_exposure = np.zeros(n)
+
         for i, d in enumerate(eval_idx):
             # drift through the day's returns
             r = r_eval[i]
-            gross = float(np.dot(w, r)) + (1 - w.sum()) * daily_cash
+            shorts = float(-np.minimum(w, 0.0).sum())   # gross short exposure, positive
+            short_exposure[i] = shorts
+            gross_exposure[i] = float(np.abs(w).sum())
+            gross = float(np.dot(w, r)) + (1 - w.sum()) * daily_cash - shorts * daily_borrow
             w = w * (1 + r)
             total = 1 + gross
             w = w / total if total != 0 else w
@@ -166,6 +179,14 @@ class Backtest:
         metrics = compute_metrics(daily, bench_daily)
         metrics["annual_turnover"] = round(float(turn.sum() / (n / 252)), 3)
         metrics["time_in_market"] = round(float((weights.sum(axis=1) > 0.01).mean()), 4)
+        # A market-neutral book sums to zero, so time_in_market reads 0% for it and means
+        # nothing. These describe exposure in a way that survives short positions.
+        metrics["avg_gross_exposure"] = round(float(gross_exposure.mean()), 4)
+        metrics["avg_short_exposure"] = round(float(short_exposure.mean()), 4)
+        metrics["avg_net_exposure"] = round(float(weights.sum(axis=1).mean()), 4)
+        metrics["time_with_a_position"] = round(float((gross_exposure > 0.01).mean()), 4)
+        metrics["borrow_bps"] = self.borrow_bps
+        metrics["annual_borrow_cost"] = round(float(short_exposure.mean() * self.borrow_bps / 1e4), 5)
         metrics["avg_cost_drag_annual"] = round(float((turn.sum() * self.cost_bps / 1e4) / (n / 252)), 5)
         bmetrics = compute_metrics(bench_daily, bench_daily)
         ext = extended_metrics(daily, bench_daily)

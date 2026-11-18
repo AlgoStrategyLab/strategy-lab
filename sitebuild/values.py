@@ -23,17 +23,24 @@ def _pct(x: float, dp: int) -> str:
     return ("\u2212" + s) if x < 0 else s
 
 
+def _minus(s: str) -> str:
+    """ASCII hyphen to U+2212, so a negative ratio matches the typography of a
+    negative percentage. Until an article reported a negative Sharpe this never came
+    up, and the two then sat in the same sentence looking different."""
+    return ("\u2212" + s[1:]) if s.startswith("-") else s
+
+
 FORMATS = {
     "pct": lambda x: _pct(x, 1),
     "pct1": lambda x: _pct(x, 1),
     "pct2": lambda x: _pct(x, 2),
     "pct0": lambda x: _pct(x, 0),
-    "num": lambda x: f"{x:,.2f}",
-    "num1": lambda x: f"{x:,.1f}",
-    "num0": lambda x: f"{x:,.0f}",
-    "money": lambda x: f"${x:,.2f}",
-    "money1": lambda x: f"${x:,.1f}",
-    "x": lambda x: f"{x:.2f}",
+    "num": lambda x: _minus(f"{x:,.2f}"),
+    "num1": lambda x: _minus(f"{x:,.1f}"),
+    "num0": lambda x: _minus(f"{x:,.0f}"),
+    "money": lambda x: _minus(f"${abs(x):,.2f}" if x >= 0 else f"-${abs(x):,.2f}"),
+    "money1": lambda x: _minus(f"${abs(x):,.1f}" if x >= 0 else f"-${abs(x):,.1f}"),
+    "x": lambda x: _minus(f"{x:.2f}"),
     "raw": lambda x: str(x),
 }
 

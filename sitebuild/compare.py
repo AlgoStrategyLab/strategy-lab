@@ -39,9 +39,24 @@ EQUITY_COLUMN = {
     "sma-trend-filter": "SMA",
     "donchian-breakout": "Donchian",
     "rsi2-mean-reversion": "RSI2",
+    "pairs-trading": "Pairs",
 }
 
 COLOURS = [C["blue"], C["aqua"], C["violet"], C["yellow"], C["red"]]
+
+def is_market_neutral(results: dict) -> bool:
+    """True for a long/short book that nets out to roughly zero market exposure.
+
+    This is structural rather than statistical on purpose. A low beta alone does not
+    mean neutral — RSI(2) has a beta of 0.06 only because it is in cash 94% of the
+    time, and its capture ratios are a real statement about the months it does hold
+    equities. A book that carries shorts against its longs and nets to zero has no
+    market exposure for a capture ratio to divide by, which is a different thing.
+    """
+    main = results.get("main", {})
+    short = float(main.get("avg_short_exposure") or 0.0)
+    net = float(main.get("avg_net_exposure") or 0.0)
+    return short > 0.01 and abs(net) < 0.10
 
 
 def _series_path(slug: str) -> Path | None:
@@ -140,6 +155,7 @@ def render(strategies, outdir: Path) -> dict:
     order = [s.slug for s in strategies if s.slug in frame.columns]
     colour = {slug: COLOURS[i % len(COLOURS)] for i, slug in enumerate(order)}
     bench = frame["__benchmark__"]
+    neutral_book = {s.slug: is_market_neutral(s.results) for s in strategies}
 
     # --- 1. growth of $1 ---------------------------------------------------
     fig, ax = plt.subplots(figsize=(11, 5.4), dpi=160)
@@ -189,7 +205,14 @@ def render(strategies, outdir: Path) -> dict:
     fig.tight_layout(); fig.savefig(outdir / "compare_relative.png"); plt.close(fig)
 
     # --- 3. up-capture against down-capture --------------------------------
-    caps = {slug: capture_ratios(frame, slug) for slug in order}
+    # Capture ratios divide the strategy's average monthly move by the index's, so
+    # they only mean something for a strategy that has market exposure to capture. On
+    # a market-neutral book the two averages are unrelated and the ratio comes out as
+    # noise with a percent sign — here, mildly negative. Those strategies are named
+    # beside the chart instead of plotted on it.
+    directional = [s for s in order if not neutral_book.get(s)]
+    neutral = [s for s in order if s not in directional]
+    caps = {slug: capture_ratios(frame, slug) for slug in directional}
     fig, ax = plt.subplots(figsize=(9.6, 6.0), dpi=160)
     ax.axhline(100, color=C["grid"], lw=1.2, zorder=1)
     ax.axvline(100, color=C["grid"], lw=1.2, zorder=1)
@@ -200,7 +223,7 @@ def render(strategies, outdir: Path) -> dict:
     ax.text(-12, -4, "equal capture \u2014 above this line a strategy keeps more\n"
             "of the index's rise than of its fall", color=C["aqua"], fontsize=9.5,
             fontweight="semibold", va="top", ha="left")
-    for slug in order:
+    for slug in directional:
         u, d = caps[slug]
         ax.scatter(d, u, s=200, color=colour[slug], edgecolor="white", linewidth=1.5, zorder=4)
         ax.annotate(label[slug], (d, u), textcoords="offset points", xytext=(12, -3),
@@ -250,4 +273,5 @@ def render(strategies, outdir: Path) -> dict:
     fig.tight_layout(); fig.savefig(outdir / "compare_episodes.png"); plt.close(fig)
 
     return {"start": start, "end": end, "stats": stats, "labels": label,
-            "order": order, "capture": caps}
+            "order": order, "capture": caps, "neutral": neutral,
+            "directional": directional}

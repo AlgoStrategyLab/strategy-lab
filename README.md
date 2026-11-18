@@ -18,6 +18,7 @@ Author: Abhinav Taduka — software architect, quant algo developer. EPAT (Quant
 | 02 | [10-month SMA filter](strategies/sma-trend-filter) | trend-following | monthly | 1987–2026 | 9.38% | 0.71 | −35.18% |
 | 03 | [Donchian 20/10 breakout](strategies/donchian-breakout) | trend-following | daily | 1987–2026 | 5.24% | 0.56 | −35.83% |
 | 04 | [RSI(2) mean reversion](strategies/rsi2-mean-reversion) | mean-reversion | daily | 1987–2026 | 3.62% | 0.79 | −15.69% |
+| 05 | [Pairs trading](strategies/pairs-trading) | statistical-arbitrage | daily | 2000–2026 | −0.13% | -0.04 | −9.63% |
 <!-- strategies:end -->
 
 Benchmarks and the full metric sheet for each run live in that strategy's `output/*.json`.
