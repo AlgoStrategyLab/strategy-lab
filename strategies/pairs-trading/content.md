@@ -1,6 +1,6 @@
 Every strategy in this series so far has needed the market to go somewhere. [Dual momentum](../dual-momentum/) and the [10-month moving average](../sma-trend-filter/) need it to trend. The [Donchian breakout](../donchian-breakout/) needs it to break out. Even [RSI(2)](../rsi2-mean-reversion/), which buys weakness, needs the snap-back to arrive within a few days. All four are long-only, and all four spend part of their history sitting in Treasury bills because the only alternative they have to owning the index is owning nothing.
 
-Pairs trading is the first strategy here that does not care which way the market goes. You buy one instrument, short another, and collect the difference when the gap between them closes. The market can halve; if your two legs halve together, you are flat.
+Pairs trading is the first strategy here that does not care which way the market goes. You buy one instrument, [short](gl:short-sale) another, and collect the difference when the gap between them closes. The market can halve; if your two legs halve together, you are flat.
 
 That is an appealing promise, and the academic record behind it is strong. So this article tests whether it survives contact with the instruments a retail account can actually borrow.
 
@@ -14,20 +14,20 @@ That is an appealing promise, and the academic record behind it is strong. So th
 
 ## The rule, exactly as backtested
 
-This is the distance method from Gatev, Goetzmann and Rouwenhorst's 2006 paper, which is the canonical academic treatment and the version most retail write-ups are descended from.
+This is the [distance method](gl:distance-method) from Gatev, Goetzmann and Rouwenhorst's 2006 paper, which is the canonical academic treatment and the version most retail write-ups are descended from.
 
 The mechanics, using daily closing prices only:
 
 - **Formation.** Every six months, take the last 12 months of closes for each instrument and normalise each one to a cumulative total-return index starting at 1. For every possible pair, compute the sum of squared differences between the two normalised series. Rank the pairs by that sum and keep the five smallest — the five pairs that tracked each other most closely over the formation year.
-- **Trading.** Over the following six months, watch the spread between each chosen pair's normalised series. When it opens beyond **two formation-period standard deviations**, short the leg that has risen and buy the leg that has fallen, in equal dollar amounts.
-- **Exit.** Close the position when the spread crosses zero, or at the end of the six-month trading window, whichever comes first.
+- **Trading.** Over the following six months, watch the [spread](gl:spread) between each chosen pair's normalised series. When it opens beyond **two formation-period standard deviations**, short the leg that has risen and buy the leg that has fallen, in equal dollar amounts.
+- **Exit.** Close the position when the spread [crosses zero](gl:convergence), or at the end of the six-month trading window, whichever comes first.
 - Signals are computed at the close and filled at the **next** close. Capital not committed to a pair earns the T-bill rate.
 
 {{table: pt_t_setup.png | Backtest setup: Yahoo Finance daily closes, January 2000 to November 2026, 10 bps round-trip costs and a 50 bps annual borrow fee on short exposure}}
 
 The universe is 22 liquid ETFs: the four big US index funds, the nine original S&P sector SPDRs, a mid-cap fund, and eight single-country funds. That gives 231 possible pairs at each formation. **This is the single most important caveat in the article and I will come back to it at the end**, because GGR tested individual US stocks — thousands of CRSP names — and 231 ETF pairs is a different problem.
 
-One structural note, since it is the first short book in this series. The engine previously validated that portfolio weights sum to no more than 1.0, which silently made negative weights impossible. It now checks the gross sum only, and charges borrow on short exposure every day the position is open. A market-neutral pair shows up as weights of +0.1 and −0.1: gross exposure 0.2, net exposure zero.
+One structural note, since it is the first [long/short book](gl:long-short) in this series. The engine previously validated that portfolio weights sum to no more than 1.0, which silently made negative weights impossible. It now checks the gross sum only, and charges [borrow](gl:borrow-cost) on short exposure every day the position is open. A [market-neutral](gl:market-neutral) pair shows up as weights of +0.1 and −0.1: [gross exposure](gl:gross-exposure) 0.2, net exposure zero.
 
 ## Results
 
@@ -37,7 +37,7 @@ One structural note, since it is the first short book in this series. The engine
 
 {{v: main.cagr | pct2}} a year, a [Sharpe ratio](gl:sharpe) of {{v: main.sharpe | x}}, a worst [drawdown](gl:max-drawdown) of {{v: main.max_drawdown | pct1}}. Volatility of {{v: main.volatility | pct2}} against the index's {{v: benchmark.volatility | pct1}} — roughly one seventh the risk, and roughly none of the return. A dollar invested in January 2000 came back as {{v: main_extended.returns.final_equity_per_dollar | money}}.
 
-The neutrality is not a rounding artifact. Average net exposure across the whole history was {{v: main.avg_net_exposure | pct2}}, with average gross exposure of {{v: main.avg_gross_exposure | pct1}} — meaning roughly 28% long and 28% short at any moment, and a position open on {{v: main.time_with_a_position | pct1}} of days.
+The neutrality is not a rounding artifact. Average net exposure across the whole history was {{v: main.avg_net_exposure | pct2}}, with average [gross exposure](gl:gross-exposure) of {{v: main.avg_gross_exposure | pct1}} — meaning roughly 28% long and 28% short at any moment, and a position open on {{v: main.time_with_a_position | pct1}} of days.
 
 {{fig: pt_c4_neutrality.png | Daily returns against the index, and rolling beta. There is no relationship to find.}}
 

@@ -11,7 +11,10 @@ import numpy as np
 import pandas as pd
 
 OUT = Path(__file__).parent / "output"
-DEST = Path(__file__).parent.parent.parent / "sitebuild" / "assets" / "charts"
+# The site generator collects each strategy's charts from its own output/ folder
+# and its tables from tables/. Writing anywhere else produces a page whose images
+# are simply absent, with nothing in the build to say so.
+DEST = OUT
 DEST.mkdir(parents=True, exist_ok=True)
 C = {"blue": "#2a78d6", "orange": "#eb6834", "aqua": "#1baf7a", "yellow": "#eda100",
      "violet": "#6250d6", "red": "#e34948", "ink": "#0b0b0b", "ink2": "#52514e",

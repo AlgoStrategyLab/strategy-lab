@@ -460,6 +460,26 @@ def feed_xml(strategies: list[Strategy]) -> str:
 # ---------------------------------------------------------------- build
 
 
+
+def check_assets(out: Path) -> None:
+    """Fail the build if a page points at an image that is not there.
+
+    Charts are collected from each strategy's output/ folder and tables from its
+    tables/ folder. A script that writes them anywhere else produces a page with
+    silently missing figures: the HTML is valid, every value resolves, and the
+    article is simply blank where the evidence should be. This turns that into a
+    build error, the same way an unresolved {{v: ...}} reference already is.
+    """
+    missing = []
+    ref = re.compile(r'src="\.\./(assets/[a-z]+/[^"]+)"')
+    for page in sorted(out.glob("*/index.html")) + sorted(out.glob("*/medium.html")):
+        for rel in ref.findall(page.read_text(encoding="utf-8")):
+            if not (out / rel).exists():
+                missing.append(f"{page.parent.name}/{page.name} -> {rel}")
+    if missing:
+        raise SystemExit("missing assets:\n  " + "\n  ".join(sorted(set(missing))))
+
+
 def build(out: Path) -> list[str]:
     strategies = load_all()
     out.mkdir(parents=True, exist_ok=True)
@@ -517,6 +537,7 @@ def build(out: Path) -> list[str]:
     written += ["index.html", "compare/index.html", "feed.xml"]
     if update_readme(strategies):
         written.append("../README.md")
+    check_assets(out)
     return written
 
 

@@ -8,7 +8,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from sitebuild.render import make_renderer
 
 OUT = Path(__file__).parent / "output"
-render = make_renderer(Path(__file__).parent.parent.parent / "sitebuild" / "assets" / "tables")
+render = make_renderer(Path(__file__).parent / "tables")
 S = json.load(open(OUT / "voltarget_summary.json"))
 
 pct = lambda x, d=2: ("−" if x < 0 else "") + f"{abs(x)*100:.{d}f}%"
