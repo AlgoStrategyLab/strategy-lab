@@ -93,7 +93,7 @@ class Backtest:
     def __init__(self, prices: pd.DataFrame, strategy: Strategy, benchmark: str = "SPY",
                  rebalance: str = "M", cost_bps: float = 10.0, cash_rate: float = 0.0,
                  start: str | None = None, end: str | None = None, warmup_days: int = 0,
-                 borrow_bps: float = 0.0):
+                 borrow_bps: float = 0.0, max_gross: float = 1.0, margin_bps: float = 0.0):
         self.prices = prices.sort_index()
         self.strategy = strategy
         self.benchmark = benchmark
@@ -108,6 +108,16 @@ class Backtest:
         #: borrow is a real, recurring fee and for a market-neutral strategy it comes
         #: straight off the top of a return that was never large to begin with.
         self.borrow_bps = borrow_bps
+        #: Largest net exposure a strategy may ask for. 1.0 means no leverage: the
+        #: portfolio can be fully invested and no more. Above 1.0 the extra capital is
+        #: borrowed, which is why it travels with ``margin_bps`` rather than alone.
+        self.max_gross = max_gross
+        #: Annual spread ABOVE ``cash_rate`` paid on borrowed capital, charged daily on
+        #: the amount above 1.0. The cash rate itself is already charged by the cash
+        #: term, which goes negative once weights sum past one; this is the broker's
+        #: margin on top. Leaving it at zero finances leverage at T-bills, which no
+        #: retail account does.
+        self.margin_bps = margin_bps
 
     def run(self) -> BacktestResult:
         px = self.prices
@@ -120,8 +130,9 @@ class Backtest:
         rb_dates = rb_dates[(rb_dates >= eval_start) & (rb_dates <= eval_end)]
 
         targets = self.strategy.target_weights(px, rb_dates).reindex(columns=px.columns).fillna(0.0)
-        if (targets.sum(axis=1) > 1.0 + 1e-9).any():
-            raise ValueError("target weights exceed 1.0 on some rebalance date")
+        if (targets.sum(axis=1) > self.max_gross + 1e-9).any():
+            raise ValueError(
+                f"target weights exceed max_gross={self.max_gross} on some rebalance date")
 
         # shift execution to the next trading day
         pos = idx.get_indexer(targets.index)
@@ -144,8 +155,10 @@ class Backtest:
         r_eval = rets.loc[eval_idx].values
 
         daily_borrow = self.borrow_bps / 1e4 / 252.0
+        daily_margin = self.margin_bps / 1e4 / 252.0
         short_exposure = np.zeros(n)
         gross_exposure = np.zeros(n)
+        leverage = np.zeros(n)
 
         for i, d in enumerate(eval_idx):
             # drift through the day's returns
@@ -153,7 +166,13 @@ class Backtest:
             shorts = float(-np.minimum(w, 0.0).sum())   # gross short exposure, positive
             short_exposure[i] = shorts
             gross_exposure[i] = float(np.abs(w).sum())
-            gross = float(np.dot(w, r)) + (1 - w.sum()) * daily_cash - shorts * daily_borrow
+            # Capital borrowed to hold more than the account is worth. The cash term below
+            # already charges the risk-free rate on it (1 - w.sum() goes negative); this is
+            # the broker's spread on top of that.
+            borrowed = max(float(w.sum()) - 1.0, 0.0)
+            leverage[i] = borrowed
+            gross = (float(np.dot(w, r)) + (1 - w.sum()) * daily_cash
+                     - shorts * daily_borrow - borrowed * daily_margin)
             w = w * (1 + r)
             total = 1 + gross
             w = w / total if total != 0 else w
@@ -186,6 +205,11 @@ class Backtest:
         metrics["avg_net_exposure"] = round(float(weights.sum(axis=1).mean()), 4)
         metrics["time_with_a_position"] = round(float((gross_exposure > 0.01).mean()), 4)
         metrics["borrow_bps"] = self.borrow_bps
+        metrics["margin_bps"] = self.margin_bps
+        metrics["avg_borrowed"] = round(float(leverage.mean()), 4)
+        metrics["max_borrowed"] = round(float(leverage.max()), 4)
+        metrics["time_levered"] = round(float((leverage > 1e-6).mean()), 4)
+        metrics["annual_margin_cost"] = round(float(leverage.mean() * self.margin_bps / 1e4), 5)
         metrics["annual_borrow_cost"] = round(float(short_exposure.mean() * self.borrow_bps / 1e4), 5)
         metrics["avg_cost_drag_annual"] = round(float((turn.sum() * self.cost_bps / 1e4) / (n / 252)), 5)
         bmetrics = compute_metrics(bench_daily, bench_daily)
@@ -204,7 +228,8 @@ class Backtest:
             strategy=self.strategy.describe(),
             config={
                 "benchmark": self.benchmark, "rebalance": self.rebalance, "cost_bps": self.cost_bps,
-                "cash_rate": self.cash_rate, "start": str(eval_idx[0].date()), "end": str(eval_idx[-1].date()),
+                "cash_rate": self.cash_rate, "max_gross": self.max_gross, "margin_bps": self.margin_bps,
+                "start": str(eval_idx[0].date()), "end": str(eval_idx[-1].date()),
                 "execution": "signal at close, fill next close", "data": "yfinance adjusted close",
             },
             metrics=metrics, benchmark_metrics=bmetrics,

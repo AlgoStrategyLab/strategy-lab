@@ -40,6 +40,7 @@ EQUITY_COLUMN = {
     "donchian-breakout": "Donchian",
     "rsi2-mean-reversion": "RSI2",
     "pairs-trading": "Pairs",
+    "volatility-targeting": "VT",
 }
 
 COLOURS = [C["blue"], C["aqua"], C["violet"], C["yellow"], C["red"]]

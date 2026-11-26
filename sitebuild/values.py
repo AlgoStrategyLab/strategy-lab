@@ -41,6 +41,9 @@ FORMATS = {
     "money": lambda x: _minus(f"${abs(x):,.2f}" if x >= 0 else f"-${abs(x):,.2f}"),
     "money1": lambda x: _minus(f"${abs(x):,.1f}" if x >= 0 else f"-${abs(x):,.1f}"),
     "x": lambda x: _minus(f"{x:.2f}"),
+    # Three decimals, for Sharpe ratios and the differences between them: at two,
+    # a change of 0.018 and a change of 0.021 both read as "0.02".
+    "x3": lambda x: _minus(f"{x:.3f}"),
     "raw": lambda x: str(x),
 }
 

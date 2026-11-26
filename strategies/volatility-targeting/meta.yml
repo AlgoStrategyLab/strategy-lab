@@ -1,0 +1,41 @@
+slug: volatility-targeting
+number: 6
+title: A Volatility Layer Improved Every Rule I Put It On. On Shuffled Dates It Was Worse Than Nothing.
+short_name: Vol-targeted buy & hold
+deck: Scaling a position by target volatility over recent volatility cut the worst drawdown of buy &
+  hold from 55% to 29%. Two controls show the whole of the gain is timing, and none of it is holding less.
+published: 2026-11-25
+family: risk-management
+sub_family: volatility scaling overlay
+asset_class: us-equity
+frequency: daily
+universe:
+- VFINX
+- VGTSX
+- VBMFX
+- ^IRX
+period:
+  start: '1981-11-02'
+  end: '2026-11-06'
+costs_bps: 10
+summary_json: output/voltarget_summary.json
+headline:
+  cagr: main.cagr
+  sharpe: main.sharpe
+  max_drawdown: main.max_drawdown
+og_image: vt_c3_shuffled.png
+og_description: 'Volatility targeting backtested as a layer over buy and hold and four strategies
+  from the Strategy Lab series, 1981-2026: the worst drawdown of buy and hold falls from 55% to 29%,
+  Sharpe rises on all five books, and two controls show the gain comes entirely from the timing.'
+code_note: 'Same open-source harness as the rest of the series. This article needed the engine to hold
+  more than it owns, so it now takes a leverage cap and charges a margin spread on borrowed capital,
+  alongside the short book added in article #5. The layer is a strategy that wraps another strategy,
+  which means it applies to every rule in the repo without touching any of them.'
+next_teaser: risk parity — splitting money between assets by how much each one moves, rather than by
+  a rule about which one to own.
+references: 'Moreira, A. & Muir, T. (2017), "Volatility-Managed Portfolios", _Journal of Finance_ 72(4)
+  — the paper this tests. Harvey, C. et al. (2018), "The Impact of Volatility Targeting", _Journal of
+  Portfolio Management_ 45(1). Cederburg, S. et al. (2020), "On the Performance of Volatility-Managed
+  Portfolios", _Journal of Financial Economics_ 138(1) — the main out-of-sample challenge to Moreira
+  and Muir. Barroso, P. & Santa-Clara, P. (2015), "Momentum Has Its Moments". Data: Yahoo Finance
+  adjusted closes, retrieved 25 November 2026.'
